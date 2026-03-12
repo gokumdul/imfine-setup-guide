@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude 개발환경 셋업 가이드</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f8fc;
+    --surface: #ffffff;
+    --surface2: #f0f2f8;
+    --border: #e2e6f0;
+    --text: #1a1d2e;
+    --text-sub: #5a6080;
+    --accent: #3b5bdb;
+    --accent-light: #eef2ff;
+    --mac: #0071e3;
+    --mac-light: #e8f2fd;
+    --win: #0078d4;
+    --win-light: #e3f2ff;
+    --success: #2f9e44;
+    --success-light: #d3f9d8;
+    --warn: #e67700;
+    --warn-light: #fff3bf;
+    --code-bg: #1e2030;
+    --code-text: #c8d3f5;
+    --radius: 10px;
+    --shadow: 0 2px 12px rgba(59,91,219,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.75;
+  }
+
+  /* ── 헤더 ── */
+  .hero {
+    background: linear-gradient(135deg, #1a1d2e 0%, #2d3561 60%, #3b5bdb 100%);
+    color: #fff;
+    padding: 64px 48px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 80% 50%, rgba(99,130,255,0.18) 0%, transparent 65%);
+  }
+  .hero-inner { position: relative; max-width: 860px; margin: 0 auto; }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    color: #a5b4fc;
+    margin-bottom: 24px;
+    font-weight: 500;
+  }
+  .hero h1 {
+    font-size: 38px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    line-height: 1.25;
+    margin-bottom: 14px;
+  }
+  .hero h1 span { color: #818cf8; }
+  .hero p {
+    font-size: 16px;
+    color: #a5b4fc;
+    max-width: 560px;
+    font-weight: 300;
+  }
+  .hero-meta {
+    margin-top: 32px;
+    display: flex;
+    gap: 24px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+  }
+  .hero-meta span::before { content: '·'; margin-right: 6px; }
+  .hero-meta span:first-child::before { content: ''; margin: 0; }
+
+  /* ── 레이아웃 ── */
+  .layout {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+
+  /* ── 사이드 목차 ── */
+  .toc {
+    position: sticky;
+    top: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .toc-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-sub);
+    margin-bottom: 14px;
+  }
+  .toc a {
+    display: block;
+    font-size: 13px;
+    color: var(--text-sub);
+    text-decoration: none;
+    padding: 5px 8px;
+    border-radius: 6px;
+    transition: all 0.15s;
+    line-height: 1.4;
+  }
+  .toc a:hover { background: var(--accent-light); color: var(--accent); }
+  .toc a.part {
+    font-weight: 700;
+    color: var(--text);
+    margin-top: 10px;
+    font-size: 12.5px;
+  }
+  .toc a.sub { padding-left: 18px; font-size: 12px; }
+  .toc-divider { border: none; border-top: 1px solid var(--border); margin: 8px 0; }
+
+  /* ── 컨텐츠 ── */
+  .content { min-width: 0; }
+
+  /* ── 섹션 ── */
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 36px 36px 28px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+  }
+
+  .part-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-light);
+    border-radius: 4px;
+    padding: 3px 10px;
+    margin-bottom: 12px;
+  }
+
+  h2.section-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+  .section-desc {
+    color: var(--text-sub);
+    font-size: 14px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 20px;
+  }
+
+  h3.step-group {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 24px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ── OS 배지 ── */
+  .os-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 14px;
+    border-radius: 6px;
+    margin: 16px 0 10px;
+  }
+  .os-badge.mac { background: var(--mac-light); color: var(--mac); border-left: 3px solid var(--mac); }
+  .os-badge.win { background: var(--win-light); color: var(--win); border-left: 3px solid var(--win); }
+  .os-badge.both { background: var(--accent-light); color: var(--accent); border-left: 3px solid var(--accent); }
+
+  /* ── 스텝 ── */
+  .steps { display: flex; flex-direction: column; gap: 10px; margin: 14px 0; }
+  .step {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 1px;
+  }
+  .step-body { flex: 1; }
+  .step-title { font-weight: 600; font-size: 14px; color: var(--text); margin-bottom: 2px; }
+  .step-desc { font-size: 13.5px; color: var(--text-sub); }
+
+  /* ── 코드 블록 ── */
+  .code-block {
+    background: var(--code-bg);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 12px 0;
+    position: relative;
+    overflow-x: auto;
+  }
+  .code-block pre {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--code-text);
+    line-height: 1.7;
+    white-space: pre;
+  }
+  .code-label {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: #4a5180;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .code-comment { color: #4a5568; }
+  .code-cmd { color: #7dd3fc; }
+  .code-str { color: #86efac; }
+
+  /* ── 노트 ── */
+  .note {
+    border-radius: 8px;
+    padding: 13px 16px;
+    font-size: 13.5px;
+    margin: 12px 0;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .note.tip { background: var(--success-light); color: #1a6b2a; border-left: 3px solid var(--success); }
+  .note.warn { background: var(--warn-light); color: #7c4a00; border-left: 3px solid var(--warn); }
+  .note.info { background: var(--accent-light); color: #2b3db0; border-left: 3px solid var(--accent); }
+  .note-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── 리스트 ── */
+  ul.guide-list, ol.guide-list {
+    padding-left: 22px;
+    margin: 10px 0;
+    color: var(--text-sub);
+    font-size: 14px;
+  }
+  ul.guide-list li, ol.guide-list li { margin-bottom: 5px; }
+  ul.guide-list li strong, ol.guide-list li strong { color: var(--text); }
+
+  p.body { font-size: 14px; color: var(--text-sub); margin: 8px 0; line-height: 1.8; }
+  p.body strong { color: var(--text); }
+
+  /* ── 테이블 ── */
+  .guide-table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 12px 0; }
+  .guide-table th {
+    background: #1a1d2e;
+    color: #a5b4fc;
+    font-weight: 600;
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+  }
+  .guide-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text-sub); }
+  .guide-table tr:last-child td { border-bottom: none; }
+  .guide-table tr:nth-child(even) td { background: var(--surface2); }
+  .guide-table code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--accent);
+  }
+
+  /* ── 체크리스트 ── */
+  .checklist { display: flex; flex-direction: column; gap: 8px; margin: 14px 0; }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--text-sub);
+    background: var(--surface);
+  }
+  .check-item:nth-child(odd) { background: var(--surface2); }
+  .checkbox {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border);
+    border-radius: 5px;
+    flex-shrink: 0;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .checkbox:checked {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* ── 트러블슈팅 카드 ── */
+  .trouble-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .trouble-q {
+    background: var(--surface2);
+    padding: 12px 18px;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .trouble-q::before { content: 'Q'; background: var(--warn); color: #fff; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .trouble-a {
+    padding: 14px 18px;
+    font-size: 13.5px;
+    color: var(--text-sub);
+  }
+
+  /* ── 진행 뱃지 (준비물) ── */
+  .prep-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin: 14px 0;
+  }
+  .prep-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13.5px;
+    color: var(--text-sub);
+    background: var(--surface2);
+  }
+  .prep-icon { font-size: 20px; }
+
+  /* ── 섹션 구분선 ── */
+  .divider {
+    border: none;
+    border-top: 2px dashed var(--border);
+    margin: 28px 0;
+  }
+
+  /* ── 푸터 ── */
+  footer {
+    text-align: center;
+    padding: 32px;
+    font-size: 12.5px;
+    color: #9aa0c0;
+    border-top: 1px solid var(--border);
+    margin-top: 20px;
+  }
+
+  @media (max-width: 700px) {
+    .layout { grid-template-columns: 1fr; }
+    .toc { display: none; }
+    .hero { padding: 36px 20px; }
+    .hero h1 { font-size: 26px; }
+    .section { padding: 24px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ────────── HERO ────────── -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">🤖 Internal Documentation</div>
+    <h1>Claude <span>개발환경</span> 셋업 가이드</h1>
+    <p>비개발자를 위한 단계별 설치 가이드 — macOS 및 Windows 모두 지원</p>
+    <div class="hero-meta">
+      <span>아임파인(I'm Fine) 내부 문서</span>
+      <span>소요시간 약 30~60분</span>
+      <span>최초 작성 2025</span>
+    </div>
+  </div>
+</div>
+
+<!-- ────────── LAYOUT ────────── -->
+<div class="layout">
+
+  <!-- 목차 -->
+  <aside class="toc">
+    <div class="toc-title">목차</div>
+    <a href="#overview">📋 개요 및 준비물</a>
+    <hr class="toc-divider">
+    <a href="#github" class="part">PART 1. GitHub</a>
+    <a href="#github" class="sub">계정 만들기</a>
+    <hr class="toc-divider">
+    <a href="#macos" class="part">PART 2. macOS</a>
+    <a href="#mac-homebrew" class="sub">Homebrew 설치</a>
+    <a href="#mac-node" class="sub">Node.js 설치</a>
+    <a href="#mac-git" class="sub">Git 설정</a>
+    <a href="#mac-vscode" class="sub">VS Code 설치</a>
+    <a href="#mac-claude" class="sub">Claude Code 설치</a>
+    <hr class="toc-divider">
+    <a href="#windows" class="part">PART 3. Windows</a>
+    <a href="#win-terminal" class="sub">Terminal 설치</a>
+    <a href="#win-node" class="sub">Node.js 설치</a>
+    <a href="#win-git" class="sub">Git 설치</a>
+    <a href="#win-vscode" class="sub">VS Code 설치</a>
+    <a href="#win-claude" class="sub">Claude Code 설치</a>
+    <hr class="toc-divider">
+    <a href="#gh-connect" class="part">PART 4. GitHub 연동</a>
+    <a href="#usage" class="part">PART 5. 첫 사용</a>
+    <hr class="toc-divider">
+    <a href="#trouble">🔧 트러블슈팅</a>
+    <a href="#checklist">✅ 완료 체크리스트</a>
+  </aside>
+
+  <!-- 본문 -->
+  <main class="content">
+
+    <!-- ── 개요 ── -->
+    <div class="section" id="overview">
+      <div class="part-label">📋 개요</div>
+      <h2 class="section-title">시작 전 확인사항</h2>
+      <p class="section-desc">이 문서는 개발 경험이 없는 팀원이 Claude Code CLI를 활용한 AI 개발환경을 처음부터 셋업할 수 있도록 작성되었습니다.</p>
+
+      <h3 class="step-group">✅ 필요한 준비물</h3>
+      <div class="prep-grid">
+        <div class="prep-item"><span class="prep-icon">📧</span> 개인 이메일 주소 (GitHub 가입용)</div>
+        <div class="prep-item"><span class="prep-icon">🔑</span> Claude 계정 정보 (팀 관리자에게 별도 전달)</div>
+        <div class="prep-item"><span class="prep-icon">🌐</span> 안정적인 인터넷 연결</div>
+        <div class="prep-item"><span class="prep-icon">💻</span> macOS 또는 Windows 10/11 PC</div>
+      </div>
+      <div class="note tip">
+        <span class="note-icon">💡</span>
+        <span>이 문서를 순서대로 따라하면 <strong>약 30~60분</strong> 내에 셋업이 완료됩니다. Claude 계정은 회사에서 제공합니다.</span>
+      </div>
+    </div>
+
+    <!-- ── PART 1: GitHub ── -->
+    <div class="section" id="github">
+      <div class="part-label">PART 1</div>
+      <h2 class="section-title">GitHub 계정 만들기</h2>
+      <p class="section-desc">GitHub는 코드를 저장·공유하는 플랫폼입니다. macOS/Windows 공통으로 진행합니다.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">GitHub 사이트 접속</div>
+            <div class="step-desc">웹 브라우저에서 <strong>github.com</strong> 에 접속합니다.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">회원가입 시작</div>
+            <div class="step-desc"><strong>Sign up</strong> 버튼 클릭 → 이메일 입력 → 비밀번호 설정 → 사용자명(username) 입력</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">이메일 인증</div>
+            <div class="step-desc">가입한 이메일로 발송된 인증 코드(6자리)를 입력합니다.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">플랜 선택</div>
+            <div class="step-desc"><strong>Free 플랜</strong> 선택 (비용 없음) → 설문은 스킵 가능</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <div class="step-title">가입 완료 확인</div>
+            <div class="step-desc">대시보드 화면이 보이면 GitHub 계정 생성 완료!</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="note warn">
+        <span class="note-icon">⚠️</span>
+        <span><strong>사용자명(username)</strong>은 나중에 바꾸기 어렵습니다. 영문 소문자와 숫자, 하이픈(-)만 사용하세요.<br>예: <code style="background:#fff3bf;padding:1px 5px;border-radius:3px;">imfine-gildong</code></span>
+      </div>
+    </div>
+
+    <!-- ── PART 2: macOS ── -->
+    <div class="section" id="macos">
+      <div class="part-label">PART 2</div>
+      <h2 class="section-title">macOS 환경 셋업</h2>
+      <p class="section-desc">Apple Silicon(M1/M2/M3) 및 Intel Mac 모두 지원합니다. Windows 사용자는 PART 3으로 이동하세요.</p>
+      <div class="os-badge mac">🍎 macOS 전용 섹션</div>
+
+      <!-- Homebrew -->
+      <h3 class="step-group" id="mac-homebrew">2-1. Homebrew 설치 (패키지 관리자)</h3>
+      <p class="body">Homebrew는 macOS에서 개발 도구를 쉽게 설치할 수 있게 해주는 필수 도구입니다.</p>
+
+      <p class="body"><strong>① Terminal 앱 실행</strong></p>
+      <ul class="guide-list">
+        <li>Spotlight 검색 <strong>(Cmd + Space)</strong> → <strong>Terminal</strong> 입력 → Enter</li>
+      </ul>
+
+      <p class="body"><strong>② 아래 명령어를 터미널에 붙여넣고 Enter</strong></p>
+      <div class="code-block">
+        <span class="code-label">bash</span>
+        <pre><span class="code-cmd">/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</span></pre>
+      </div>
+
+      <div class="note warn">
+        <span class="note-icon">⚠️</span>
+        <span>Mac 로그인 비밀번호를 요청하면 입력하세요. 입력 시 화면에 아무것도 표시되지 않는 것이 정상입니다.</span>
+      </div>
+
+      <p class="body"><strong>③ 설치 완료 후 PATH 추가</strong> — 터미널에 표시되는 'Next steps' 명령어를 실행합니다:</p>
+      <div class="code-block">
+        <span class="code-label">bash</span>
+        <pre><span class="code-cmd">echo 'export PATH="/opt/homebrew/bin:$PATH"' >> ~/.zshrc</span>
+<span class="code-cmd">source ~/.zshrc</span></pre>
+      </div>
+
+      <p class="body"><strong>④ 설치 확인</strong></p>
+      <div class="code-block">
+        <span class="code-label">bash</span>
+        <pre><span class="code-cmd">brew --version</span>
+<span class="code-comment"># Homebrew 4.x.x 와 같은 버전 번호가 출력되면 성공!</span></pre>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Node.js -->
+      <h3 class="step-group" id="mac-node">2-2. Node.js 설치</h3>
+      <p class="body">Node.js는 Claude Code 실행에 필요한 런타임 환경입니다.</p>
+      <div class="code-block">
+        <span class="code-label">bash</span>
+        <pre><span class="code-cmd">brew install node</span></pre>
+      </div>
+      <p class="body">설치 확인:</p>
+      <div class="code-block">
+        <span class="code-label">bash</span>
+        <pre><span class="code-cmd">node --version</span>    <span class="code-comment"># v18 이상이면 OK</span>
+<span class="code-cmd">npm --version</span>     <span class="code-comment"># v8 이상이면 OK</span></pre>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Git -->
+      <h3 class="step-group" id="mac-git">2-3. Git 개인정보 설정</h3>
+      <p class="body">Git은 macOS에 기본 설치되어 있습니다. 개인정보만 설정하면 됩니다.</p>
+      <div class="code-block">
+        <span class="code-label">bash</span>
+        <pre><span class="code-cmd">git config --global user.name <span class="code-str">"홍길동"</span></span>
+<span class="code-cmd">git config --global user.email <span class="code-str">"your@email.com"</span></span>
+<span class="code-comment"># GitHub 가입 시 사용한 이름과 이메일을 입력하세요</span></pre>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- VS Code -->
+      <h3 class="step-group" id="mac-vscode">2-4. VS Code 설치</h3>
+      <div class="code-block">
+        <span class="code-label">bash</span>
+        <pre><span class="code-cmd">brew install --cask visual-studio-code</span></pre>
+      </div>
+      <p class="body">설치 후 VS Code를 실행하고 <strong>Cmd+Shift+P</strong> → <strong>"Shell Command: Install code command in PATH"</strong> 선택</p>
+      <div class="note info">
+        <span class="note-icon">💡</span>
+        <span>또는 <strong>code.visualstudio.com</strong> 에서 직접 다운로드 후 Applications 폴더로 드래그해도 됩니다.</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Claude Code -->
+      <h3 class="step-group" id="mac-claude">2-5. Claude Code CLI 설치 및 로그인</h3>
+      <div class="code-block">
+        <span class="code-label">bash</span>
+        <pre><span class="code-cmd">npm install -g @anthropic-ai/claude-code</span></pre>
+      </div>
+      <p class="body">설치 확인:</p>
+      <div class="code-block">
+        <span class="code-label">bash</span>
+        <pre><span class="code-cmd">claude --version</span></pre>
+      </div>
+      <p class="body">Claude Code 실행 및 로그인:</p>
+      <div class="code-block">
+        <span class="code-label">bash</span>
+        <pre><span class="code-cmd">claude</span>
+<span class="code-comment"># 처음 실행 시 로그인 화면이 나타납니다</span></pre>
+      </div>
+      <div class="note info">
+        <span class="note-icon">🔑</span>
+        <span><strong>회사 제공 계정 정보</strong><br>
+        아래 정보를 입력하세요 (팀 관리자에게 전달받은 내용):<br><br>
+        &nbsp;&nbsp;• 이메일: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;___________________________<br>
+        &nbsp;&nbsp;• 비밀번호: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;___________________________<br>
+        &nbsp;&nbsp;• API 키 (선택): &nbsp;___________________________
+        </span>
+      </div>
+      <div class="note warn">
+        <span class="note-icon">💡</span>
+        <span><strong>'claude: command not found'</strong> 오류가 나면 터미널을 완전히 닫고 다시 열어 재시도하세요.</span>
+      </div>
+    </div>
+
+    <!-- ── PART 3: Windows ── -->
+    <div class="section" id="windows">
+      <div class="part-label">PART 3</div>
+      <h2 class="section-title">Windows 환경 셋업</h2>
+      <p class="section-desc">Windows 10 / 11을 지원합니다. macOS 사용자는 PART 4로 이동하세요.</p>
+      <div class="os-badge win">🪟 Windows 전용 섹션</div>
+
+      <!-- Terminal -->
+      <h3 class="step-group" id="win-terminal">3-1. Windows Terminal 설치 (권장)</h3>
+      <p class="body">기본 cmd보다 훨씬 편리한 터미널입니다.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body"><div class="step-title">Microsoft Store 실행</div><div class="step-desc">시작 메뉴에서 Microsoft Store 검색 후 실행</div></div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body"><div class="step-title">'Windows Terminal' 검색 후 설치</div><div class="step-desc">설치 후 시작 메뉴에서 <strong>Windows Terminal</strong> 실행</div></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Node.js -->
+      <h3 class="step-group" id="win-node">3-2. Node.js 설치</h3>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body"><div class="step-title">nodejs.org 접속</div><div class="step-desc"><strong>LTS</strong>(Long Term Support) 버전 다운로드 클릭</div></div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body"><div class="step-title">.msi 파일 실행</div><div class="step-desc">설치 마법사에서 모두 <strong>다음(Next)</strong> 클릭 (기본 설정 유지)</div></div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body"><div class="step-title">설치 확인</div><div class="step-desc">Windows Terminal 열고 아래 명령어 실행</div></div>
+        </div>
+      </div>
+      <div class="code-block">
+        <span class="code-label">powershell</span>
+        <pre><span class="code-cmd">node --version</span>    <span class="code-comment"># v18 이상이면 OK</span>
+<span class="code-cmd">npm --version</span>     <span class="code-comment"># v8 이상이면 OK</span></pre>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Git -->
+      <h3 class="step-group" id="win-git">3-3. Git 설치 및 설정</h3>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body"><div class="step-title">git-scm.com 접속</div><div class="step-desc"><strong>Download for Windows</strong> 클릭 → .exe 파일 실행</div></div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body"><div class="step-title">설치 진행</div><div class="step-desc">모든 옵션 <strong>기본값 유지</strong>로 설치 완료</div></div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body"><div class="step-title">개인정보 설정</div><div class="step-desc">Windows Terminal에서 아래 명령어 실행</div></div>
+        </div>
+      </div>
+      <div class="code-block">
+        <span class="code-label">powershell</span>
+        <pre><span class="code-cmd">git config --global user.name <span class="code-str">"홍길동"</span></span>
+<span class="code-cmd">git config --global user.email <span class="code-str">"your@email.com"</span></span></pre>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- VS Code -->
+      <h3 class="step-group" id="win-vscode">3-4. VS Code 설치</h3>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body"><div class="step-title">code.visualstudio.com 접속</div><div class="step-desc"><strong>Download for Windows</strong> 클릭 → .exe 파일 실행</div></div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body"><div class="step-title">설치 옵션 확인</div><div class="step-desc"><strong>"Add to PATH"</strong> 옵션이 체크되어 있는지 확인 (기본으로 체크됨)</div></div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body"><div class="step-title">설치 완료 후 Terminal 재시작</div><div class="step-desc">Windows Terminal을 완전히 닫고 다시 열기</div></div>
+        </div>
+      </div>
+      <p class="body">설치 확인:</p>
+      <div class="code-block">
+        <span class="code-label">powershell</span>
+        <pre><span class="code-cmd">code --version</span></pre>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Claude Code Windows -->
+      <h3 class="step-group" id="win-claude">3-5. Claude Code CLI 설치 및 로그인</h3>
+      <div class="code-block">
+        <span class="code-label">powershell</span>
+        <pre><span class="code-cmd">npm install -g @anthropic-ai/claude-code</span></pre>
+      </div>
+      <p class="body">설치 확인 및 실행:</p>
+      <div class="code-block">
+        <span class="code-label">powershell</span>
+        <pre><span class="code-cmd">claude --version</span>
+<span class="code-cmd">claude</span>
+<span class="code-comment"># 처음 실행 시 로그인 화면이 나타납니다</span></pre>
+      </div>
+      <div class="note info">
+        <span class="note-icon">🔑</span>
+        <span><strong>회사 제공 계정 정보</strong><br>
+        아래 정보를 입력하세요 (팀 관리자에게 전달받은 내용):<br><br>
+        &nbsp;&nbsp;• 이메일: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;___________________________<br>
+        &nbsp;&nbsp;• 비밀번호: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;___________________________<br>
+        &nbsp;&nbsp;• API 키 (선택): &nbsp;___________________________
+        </span>
+      </div>
+    </div>
+
+    <!-- ── PART 4: GitHub 연동 ── -->
+    <div class="section" id="gh-connect">
+      <div class="part-label">PART 4</div>
+      <h2 class="section-title">GitHub 연동</h2>
+      <p class="section-desc">macOS/Windows 공통으로 진행합니다. GitHub CLI를 설치하고 로그인합니다.</p>
+
+      <div class="os-badge mac">🍎 macOS</div>
+      <div class="code-block">
+        <span class="code-label">bash</span>
+        <pre><span class="code-cmd">brew install gh</span></pre>
+      </div>
+
+      <div class="os-badge win">🪟 Windows</div>
+      <div class="code-block">
+        <span class="code-label">powershell</span>
+        <pre><span class="code-cmd">winget install GitHub.cli</span>
+<span class="code-comment"># winget 사용 불가 시 → cli.github.com 에서 수동 다운로드</span></pre>
+      </div>
+
+      <h3 class="step-group">GitHub 로그인 (공통)</h3>
+      <div class="code-block">
+        <span class="code-label">bash / powershell</span>
+        <pre><span class="code-cmd">gh auth login</span></pre>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body"><div class="step-desc"><strong>GitHub.com</strong> 선택 → Enter</div></div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body"><div class="step-desc"><strong>HTTPS</strong> 선택 → Enter</div></div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body"><div class="step-desc"><strong>Login with a web browser</strong> 선택 → Enter</div></div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body"><div class="step-desc">화면에 표시된 <strong>코드를 복사</strong> → 자동으로 열리는 브라우저에 코드 붙여넣기</div></div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-body"><div class="step-desc">GitHub 계정으로 인증 완료</div></div>
+        </div>
+      </div>
+      <p class="body">연동 확인:</p>
+      <div class="code-block">
+        <span class="code-label">bash / powershell</span>
+        <pre><span class="code-cmd">gh auth status</span></pre>
+      </div>
+      <div class="note tip">
+        <span class="note-icon">✅</span>
+        <span><strong>"Logged in to github.com as [사용자명]"</strong> 메시지가 보이면 연동 성공!</span>
+      </div>
+    </div>
+
+    <!-- ── PART 5: 첫 사용 ── -->
+    <div class="section" id="usage">
+      <div class="part-label">PART 5</div>
+      <h2 class="section-title">Claude Code 첫 사용 가이드</h2>
+      <p class="section-desc">Claude Code를 실행하고 첫 번째 대화를 시작해봅니다.</p>
+
+      <h3 class="step-group">프로젝트 폴더 만들기</h3>
+      <div class="os-badge mac">🍎 macOS</div>
+      <div class="code-block">
+        <span class="code-label">bash</span>
+        <pre><span class="code-cmd">mkdir ~/projects/my-project</span>
+<span class="code-cmd">cd ~/projects/my-project</span>
+<span class="code-cmd">claude</span></pre>
+      </div>
+      <div class="os-badge win">🪟 Windows</div>
+      <div class="code-block">
+        <span class="code-label">powershell</span>
+        <pre><span class="code-cmd">mkdir C:\projects\my-project</span>
+<span class="code-cmd">cd C:\projects\my-project</span>
+<span class="code-cmd">claude</span></pre>
+      </div>
+
+      <h3 class="step-group">기본 명령어</h3>
+      <table class="guide-table">
+        <thead>
+          <tr>
+            <th>명령어 / 단축키</th>
+            <th>기능</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>/help</code></td><td>도움말 표시</td></tr>
+          <tr><td><code>/exit</code> 또는 <code>/quit</code></td><td>Claude Code 종료</td></tr>
+          <tr><td><code>Ctrl+C</code> (Windows) / <code>Cmd+C</code> (Mac)</td><td>현재 작업 중단</td></tr>
+          <tr><td><code>/clear</code></td><td>대화 기록 초기화</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="step-group">활용 예시 프롬프트</h3>
+      <ul class="guide-list">
+        <li><strong>"간단한 HTML 페이지를 만들어줘"</strong></li>
+        <li><strong>"이 코드를 한국어로 설명해줘"</strong></li>
+        <li><strong>"Python으로 엑셀 파일 읽는 코드 작성해줘"</strong></li>
+        <li><strong>"이 오류를 수정해줘: [오류 메시지 붙여넣기]"</strong></li>
+        <li><strong>"이 폴더 구조로 프로젝트를 초기화해줘"</strong></li>
+      </ul>
+    </div>
+
+    <!-- ── 트러블슈팅 ── -->
+    <div class="section" id="trouble">
+      <div class="part-label">🔧 트러블슈팅</div>
+      <h2 class="section-title">자주 발생하는 문제 해결</h2>
+      <p class="section-desc">문제가 생겼을 때 가장 먼저 시도해볼 것들입니다.</p>
+
+      <div class="trouble-card">
+        <div class="trouble-q">command not found 오류가 납니다</div>
+        <div class="trouble-a">
+          <ul class="guide-list">
+            <li>터미널/Windows Terminal을 완전히 닫고 다시 열어서 재시도</li>
+            <li>macOS: <code style="font-family:monospace;background:#f0f2f8;padding:1px 5px;border-radius:3px;">source ~/.zshrc</code> 실행 후 재시도</li>
+            <li>Windows: 시스템 재시작 후 재시도</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="trouble-card">
+        <div class="trouble-q">npm 권한 오류가 납니다 (macOS)</div>
+        <div class="trouble-a">
+          <div class="code-block" style="margin:0;">
+            <pre><span class="code-cmd">sudo chown -R $(whoami) /usr/local/lib/node_modules</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="trouble-card">
+        <div class="trouble-q">Windows PowerShell에서 스크립트 실행이 차단됩니다</div>
+        <div class="trouble-a">
+          <div class="code-block" style="margin:0;">
+            <pre><span class="code-cmd">Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="trouble-card">
+        <div class="trouble-q">GitHub 인증 오류가 납니다</div>
+        <div class="trouble-a">
+          <div class="code-block" style="margin:0;">
+            <pre><span class="code-cmd">gh auth logout</span>
+<span class="code-cmd">gh auth login</span>
+<span class="code-comment"># 로그아웃 후 다시 로그인</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="trouble-card">
+        <div class="trouble-q">Claude API 키 관련 오류가 납니다</div>
+        <div class="trouble-a">
+          <strong>console.anthropic.com</strong> 접속 → API Keys 메뉴 → 새 키 발급 후 다시 시도. 또는 팀 관리자에게 계정 정보 재전달을 요청하세요.
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 체크리스트 ── -->
+    <div class="section" id="checklist">
+      <div class="part-label">✅ 완료 체크리스트</div>
+      <h2 class="section-title">셋업 완료 확인</h2>
+      <p class="section-desc">모든 항목이 체크되면 셋업이 완료된 것입니다!</p>
+
+      <div class="checklist">
+        <label class="check-item"><input type="checkbox" class="checkbox"> GitHub 계정 생성 완료</label>
+        <label class="check-item"><input type="checkbox" class="checkbox"> Node.js 설치 확인 (<code style="font-family:monospace;">node --version</code>)</label>
+        <label class="check-item"><input type="checkbox" class="checkbox"> Git 개인정보 설정 완료</label>
+        <label class="check-item"><input type="checkbox" class="checkbox"> VS Code 설치 완료</label>
+        <label class="check-item"><input type="checkbox" class="checkbox"> Claude Code CLI 설치 확인 (<code style="font-family:monospace;">claude --version</code>)</label>
+        <label class="check-item"><input type="checkbox" class="checkbox"> Claude 로그인 완료</label>
+        <label class="check-item"><input type="checkbox" class="checkbox"> GitHub CLI 설치 및 연동 완료 (<code style="font-family:monospace;">gh auth status</code>)</label>
+        <label class="check-item"><input type="checkbox" class="checkbox"> Claude Code 첫 실행 성공</label>
+      </div>
+
+      <div class="note tip" style="margin-top:20px;">
+        <span class="note-icon">🎉</span>
+        <span>모든 항목 완료! 이제 Claude Code로 AI 개발환경이 준비되었습니다. 궁금한 점은 개발팀 슬랙 채널로 문의해 주세요.</span>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<footer>
+  아임파인(I'm Fine) 내부 문서 &nbsp;·&nbsp; 이 문서는 지속적으로 업데이트됩니다 &nbsp;·&nbsp; 문의: 개발팀
+</footer>
+
+</body>
+</html>
